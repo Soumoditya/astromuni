@@ -1,4 +1,4 @@
-import { Astronomy, DefineStar, Equator, Observer } from "astronomy-engine";
+import * as Astronomy from "astronomy-engine";
 
 // --- constants ---
 const AYANAMSA_EPOCH = 2451545.0; // J2000
@@ -251,7 +251,7 @@ function getGeoEcliptic(body, date, observer, obliquity) {
 
 export function calculateChartData(date, location) {
   const { lat, lon } = location;
-  const observer = new Observer(lat, lon, 0);
+  const observer = new Astronomy.Observer(lat, lon, 0);
   const jd = Astronomy.DayValue(date);
   const ayanamsa = calculateAyanamsa(jd);
   const obliquity = Astronomy.Obliquity(date);
