@@ -120,66 +120,7 @@ function checkSadeSati(moonSign, saturnSign) {
   return { status: false, phase: "None" };
 }
 
-function getVargaSign(longitude, division) {
-  // General Varga Logic (Parashara)
-  const sign = Math.floor(longitude / 30); // 0-11
-  const deg = longitude % 30;
-  const part = Math.floor(deg / (30 / division)); // 0 to division-1
 
-  let vargaSign = 0;
-
-  // Specific Logic per Division
-  if (division === 1) return sign + 1;
-  if (division === 9) return getNavamsa(longitude);
-
-  // D4 (Chaturthamsha)
-  if (division === 4) {
-    // 1st part -> Sign itself
-    // 2nd part -> 4th from Sign
-    // 3rd part -> 7th from Sign
-    // 4th part -> 10th from Sign
-    // (Kendra from sign)
-    vargaSign = (sign + (part * 3)) % 12;
-  }
-  // D7 (Saptamsha)
-  else if (division === 7) {
-    // Odd Sign: Start from Sign itself
-    // Even Sign: Start from 7th from Sign
-    const start = (sign % 2 === 0) ? sign : (sign + 6) % 12;
-    vargaSign = (start + part) % 12;
-  }
-  // D10 (Dasamsa)
-  else if (division === 10) {
-    // Odd Sign: Start from Sign
-    // Even Sign: Start from 9th from Sign
-    const start = (sign % 2 === 0) ? sign : (sign + 8) % 12;
-    vargaSign = (start + part) % 12;
-  }
-  // D60 (Shashtiamsha)
-  else if (division === 60) {
-    // Ignore specific lordship deities for now, just mapping signs usually cyclic?
-    // Standard: (Sign + Part) % 12 ? No, usually computed differently.
-    // Parashara: "Ignore sign, just count parts"? 
-    // Actually most software uses: (Sign remainder * 2) ? No.
-    // Common Calculation: 
-    // Current Sign + Part ? No.
-    // Let's use: (Part + SignStart) ?? 
-    // Accurate Method: 
-    // Odd Sign: 1, 2, ...
-    // Even Sign: ...
-    // Let's use simple cyclical for MVP: (Part % 12) + 1? No.
-    // Let's stick to D60 = (Sign Index * 5 + Part) % 12 ???
-    // Reference: D60 is usually mapped strictly.
-    // Let's us: Start = Sign. Varga = (Sign + part) % 12.
-    // Most robust generic fallback:
-    vargaSign = (sign + part) % 12;
-  }
-  else {
-    vargaSign = (sign + part) % 12; // Fallback
-  }
-
-  return vargaSign + 1;
-}
 
 function checkManglik(lagnaSign, marsSign, moonSign) {
   // Check Mars position relative to Lagna and Moon
