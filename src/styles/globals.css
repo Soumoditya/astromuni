@@ -1,33 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Premium Vedic Color Palette */
-  --color-bg-primary: #FFF9F0; /* Cream/Vellum - Authentic Paper feel */
+  --color-bg-primary: #FFF9F0;
+  /* Cream/Vellum - Authentic Paper feel */
   --color-bg-secondary: #FDF3E3;
-  --color-text-primary: #3E2723; /* Dark Brown/Coffee for text - softer than black */
+  --color-text-primary: #3E2723;
+  /* Dark Brown/Coffee for text - softer than black */
   --color-text-secondary: #5D4037;
-  
-  --color-accent-gold: #D4AF37; /* Metallic Gold */
-  --color-accent-saffron: #FF9933; /* Spiritual Saffron */
-  --color-accent-blue: #1A237E; /* Cosmic Deep Blue */
-  --color-accent-red: #B71C1C; /* Mars/Energy */
-  
+
+  --color-accent-gold: #D4AF37;
+  /* Metallic Gold */
+  --color-accent-saffron: #FF9933;
+  /* Spiritual Saffron */
+  --color-accent-blue: #1A237E;
+  /* Cosmic Deep Blue */
+  --color-accent-red: #B71C1C;
+  /* Mars/Energy */
+
   --color-border: #D4AF37;
   --color-chart-lines: #8D6E63;
-  
+
   /* Spacing & Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
-  
-  --font-heading: 'Cinzel', serif; /* Classic/Premium look */
+
+  --font-heading: 'Cinzel', serif;
+  /* Classic/Premium look */
   --font-body: 'Inter', sans-serif;
 }
 
 [data-theme='dark'] {
-  --color-bg-primary: #0F172A; /* Deep Space Blue */
+  --color-bg-primary: #0F172A;
+  /* Deep Space Blue */
   --color-bg-secondary: #1E293B;
   --color-text-primary: #F8FAFC;
   --color-text-secondary: #CBD5E1;
-  
+
   --color-accent-gold: #FFD700;
   --color-chart-lines: #D4AF37;
 }
@@ -41,7 +53,12 @@ body {
   padding: 0;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   color: var(--color-text-primary);
 }
