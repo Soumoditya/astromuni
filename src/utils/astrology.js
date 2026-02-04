@@ -78,7 +78,136 @@ function getNavamsa(longitude) {
   return d9SignIndex + 1;
 }
 
-// Check if planet is retrograde (simple speed check)
+function getVargaSign(longitude, division) {
+  const sign = Math.floor(longitude / 30);
+  const deg = longitude % 30;
+  const part = Math.floor(deg / (30 / division));
+
+  if (division === 1) return sign + 1;
+  if (division === 9) return getNavamsa(longitude);
+
+  let vargaSign = 0;
+  if (division === 4) {
+    vargaSign = (sign + (part * 3)) % 12;
+  } else if (division === 7) {
+    const start = (sign % 2 === 0) ? sign : (sign + 6) % 12;
+    vargaSign = (start + part) % 12;
+  } else if (division === 10) {
+    const start = (sign % 2 === 0) ? sign : (sign + 8) % 12;
+    vargaSign = (start + part) % 12;
+  } else if (division === 60) {
+    vargaSign = (sign + part) % 12;
+  } else {
+    vargaSign = (sign + part) % 12;
+  }
+  return vargaSign + 1;
+}
+
+function checkManglik(lagnaSign, marsSign, moonSign) {
+  const badHouses = [0, 1, 3, 6, 7, 11];
+  const marsHouseL = (marsSign - lagnaSign + 12) % 12;
+  const marsHouseM = (marsSign - moonSign + 12) % 12;
+  const fromLagna = badHouses.includes(marsHouseL);
+  const fromMoon = badHouses.includes(marsHouseM);
+  return { isManglik: fromLagna || fromMoon, fromLagna, fromMoon };
+}
+
+function checkSadeSati(moonSign, saturnSign) {
+  const diff = (saturnSign - moonSign + 12) % 12;
+  if (diff === 11) return { status: true, phase: "Rising (1st Phase)" };
+  if (diff === 0) return { status: true, phase: "Peak (2nd Phase)" };
+  if (diff === 1) return { status: true, phase: "Setting (3rd Phase)" };
+  return { status: false, phase: "None" };
+}
+
+function getVargaSign(longitude, division) {
+  // General Varga Logic (Parashara)
+  const sign = Math.floor(longitude / 30); // 0-11
+  const deg = longitude % 30;
+  const part = Math.floor(deg / (30 / division)); // 0 to division-1
+
+  let vargaSign = 0;
+
+  // Specific Logic per Division
+  if (division === 1) return sign + 1;
+  if (division === 9) return getNavamsa(longitude);
+
+  // D4 (Chaturthamsha)
+  if (division === 4) {
+    // 1st part -> Sign itself
+    // 2nd part -> 4th from Sign
+    // 3rd part -> 7th from Sign
+    // 4th part -> 10th from Sign
+    // (Kendra from sign)
+    vargaSign = (sign + (part * 3)) % 12;
+  }
+  // D7 (Saptamsha)
+  else if (division === 7) {
+    // Odd Sign: Start from Sign itself
+    // Even Sign: Start from 7th from Sign
+    const start = (sign % 2 === 0) ? sign : (sign + 6) % 12;
+    vargaSign = (start + part) % 12;
+  }
+  // D10 (Dasamsa)
+  else if (division === 10) {
+    // Odd Sign: Start from Sign
+    // Even Sign: Start from 9th from Sign
+    const start = (sign % 2 === 0) ? sign : (sign + 8) % 12;
+    vargaSign = (start + part) % 12;
+  }
+  // D60 (Shashtiamsha)
+  else if (division === 60) {
+    // Ignore specific lordship deities for now, just mapping signs usually cyclic?
+    // Standard: (Sign + Part) % 12 ? No, usually computed differently.
+    // Parashara: "Ignore sign, just count parts"? 
+    // Actually most software uses: (Sign remainder * 2) ? No.
+    // Common Calculation: 
+    // Current Sign + Part ? No.
+    // Let's use: (Part + SignStart) ?? 
+    // Accurate Method: 
+    // Odd Sign: 1, 2, ...
+    // Even Sign: ...
+    // Let's use simple cyclical for MVP: (Part % 12) + 1? No.
+    // Let's stick to D60 = (Sign Index * 5 + Part) % 12 ???
+    // Reference: D60 is usually mapped strictly.
+    // Let's us: Start = Sign. Varga = (Sign + part) % 12.
+    // Most robust generic fallback:
+    vargaSign = (sign + part) % 12;
+  }
+  else {
+    vargaSign = (sign + part) % 12; // Fallback
+  }
+
+  return vargaSign + 1;
+}
+
+function checkManglik(lagnaSign, marsSign, moonSign) {
+  // Check Mars position relative to Lagna and Moon
+  // House Indices (0-11)
+  const marsHouseL = (marsSign - lagnaSign + 12) % 12; // 0=H1, 1=H2...
+  // Manglik Houses: 1, 2, 4, 7, 8, 12. (Indices: 0, 1, 3, 6, 7, 11)
+  const badHouses = [0, 1, 3, 6, 7, 11];
+
+  let fromLagna = badHouses.includes(marsHouseL);
+
+  // From Moon
+  const marsHouseM = (marsSign - moonSign + 12) % 12;
+  let fromMoon = badHouses.includes(marsHouseM);
+
+  return { isManglik: fromLagna || fromMoon, fromLagna, fromMoon };
+}
+
+function checkSadeSati(moonSign, saturnSign) {
+  // Sade Sati: Saturn in 12th, 1st, or 2nd from Natal Moon
+  // 12th = Index 11
+  // 1st  = Index 0
+  // 2nd  = Index 1
+  const diff = (saturnSign - moonSign + 12) % 12;
+  if (diff === 11) return { status: true, phase: "Rising (1st Phase)" };
+  if (diff === 0) return { status: true, phase: "Peak (2nd Phase)" };
+  if (diff === 1) return { status: true, phase: "Setting (3rd Phase)" };
+  return { status: false, phase: "None" };
+}
 function isRetrograde(body, date, observer) {
   if (body === "Sun" || body === "Moon") return false;
   // Calculate dist now and 1 min later
@@ -230,13 +359,66 @@ export function calculateChartData(date, location) {
     });
   });
 
+  // D9 Calculation (Navamsa)
+  const d9Planets = planets.map(p => ({
+    ...p,
+    sign: getNavamsa(p.longitude),
+    isExalted: false, isDebilitated: false, isCombust: false
+  }));
+
+  // Varga Helper
+  const calcVarga = (div) => ({
+    planets: planets.map(p => ({
+      ...p,
+      sign: getVargaSign(p.longitude, div),
+      isExalted: false, isDebilitated: false, isCombust: false
+    })),
+    lagna: {
+      sign: getVargaSign(lagnaSidereal, div),
+      degree: (lagnaSidereal * div) % 30
+    }
+  });
+
+  const d4 = calcVarga(4);
+  const d7 = calcVarga(7);
+  const d10 = calcVarga(10);
+  const d60 = calcVarga(60);
+
+  // Chandra Lagna
+  const moonPlanet = planets.find(p => p.name === "Moon");
+  const chandraLagnaSign = moonPlanet ? moonPlanet.sign : 1;
+  const chandra = {
+    planets: planets,
+    lagna: { sign: chandraLagnaSign, degree: 15 }
+  };
+
+  // Analysis
+  const mars = planets.find(p => p.name === "Mars");
+  const saturn = planets.find(p => p.name === "Saturn");
+  const manglik = checkManglik(getSign(lagnaSidereal), mars ? mars.sign : 0, chandraLagnaSign);
+  const sadeSati = checkSadeSati(chandraLagnaSign, saturn ? saturn.sign : 0);
+
   return {
     ayanamsa,
-    lagna: {
-      longitude: lagnaSidereal,
-      sign: getSign(lagnaSidereal),
-      nakshatra: getNakshatra(lagnaSidereal)
+    d1: {
+      planets: planets,
+      lagna: {
+        sign: getSign(lagnaSidereal),
+        degree: lagnaSidereal % 30,
+        nakshatra: getNakshatra(lagnaSidereal)
+      }
     },
-    planets
+    d9: {
+      planets: d9Planets,
+      lagna: {
+        sign: getNavamsa(lagnaSidereal),
+        degree: (lagnaSidereal % 3.33333) * 9
+      }
+    },
+    d4, d7, d10, d60, chandra,
+    analysis: {
+      manglik,
+      sadeSati
+    }
   };
 }

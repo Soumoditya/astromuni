@@ -200,16 +200,44 @@ export default function Home() {
                             </button>
                         </div>
 
+                        {/* Analysis Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            <div className={`p-4 rounded-xl border ${chartData.analysis.manglik.isManglik ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+                                <h4 className="font-bold text-lg mb-1">Manglik Dosha</h4>
+                                <p className="text-sm">{chartData.analysis.manglik.isManglik ? "Present" : "Not Present"}</p>
+                                {chartData.analysis.manglik.isManglik && <span className="text-xs text-red-600">Consider remedies.</span>}
+                            </div>
+                            <div className={`p-4 rounded-xl border ${chartData.analysis.sadeSati.status ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`}>
+                                <h4 className="font-bold text-lg mb-1">Sade Sati</h4>
+                                <p className="text-sm">{chartData.analysis.sadeSati.status ? `Active: ${chartData.analysis.sadeSati.phase}` : "Not Active"}</p>
+                            </div>
+                            <div className="p-4 rounded-xl border bg-purple-50 border-purple-200">
+                                <h4 className="font-bold text-lg mb-1">Nakshatra</h4>
+                                <p className="text-sm text-purple-900">{chartData.d1.lagna.nakshatra} (Lagna)</p>
+                            </div>
+                        </div>
+
                         {/* Main Charts */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                            <DiamondChart title="Lagna Chart (D1)" planets={chartData.planets} lagnaSign={chartData.lagna.sign} />
-                            {/* Note: In real app, D9 would have different planetary positions calculated via Amsha logic */}
-                            <DiamondChart title="Navamsa Chart (D9)" planets={chartData.planets} lagnaSign={chartData.lagna.sign} />
+                        <h3 className="text-2xl font-bold text-center text-amber-900 mb-6 font-serif">Divisional Charts</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <DiamondChart title="Lagna Chart (D1)" planets={chartData.d1.planets} lagnaSign={chartData.d1.lagna.sign} />
+                            <DiamondChart title="Navamsa Chart (D9)" planets={chartData.d9.planets} lagnaSign={chartData.d9.lagna.sign} />
+                            <DiamondChart title="Chandra (Moon) Chart" planets={chartData.chandra.planets} lagnaSign={chartData.chandra.lagna.sign} />
+
+                            <DiamondChart title="Chaturthamsha (D4)" planets={chartData.d4.planets} lagnaSign={chartData.d4.lagna.sign} />
+                            <DiamondChart title="Saptamsha (D7)" planets={chartData.d7.planets} lagnaSign={chartData.d7.lagna.sign} />
+                            <DiamondChart title="Dasamsa (D10)" planets={chartData.d10.planets} lagnaSign={chartData.d10.lagna.sign} />
+
+                            <div className="lg:col-span-3 flex justify-center">
+                                <div className="w-full max-w-md">
+                                    <DiamondChart title="Shashtiamsha (D60)" planets={chartData.d60.planets} lagnaSign={chartData.d60.lagna.sign} />
+                                </div>
+                            </div>
                         </div>
 
                         {/* Planetary Details Table */}
                         <div className="premium-card p-6 overflow-x-auto">
-                            <h3 className="text-xl font-bold mb-4 text-amber-800 border-b border-amber-200 pb-2">Planetary Positions</h3>
+                            <h3 className="text-xl font-bold mb-4 text-amber-800 border-b border-amber-200 pb-2">Planetary Positions (D1)</h3>
                             <table className="w-full text-left">
                                 <thead>
                                     <tr className="text-amber-900 bg-amber-50/50">
@@ -221,15 +249,16 @@ export default function Home() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {chartData.planets.map((p, i) => (
+                                    {chartData.d1.planets.map((p, i) => (
                                         <tr key={i} className="border-b border-gray-100/50 hover:bg-white/50 transition-colors">
                                             <td className="p-3 font-bold text-amber-900">{p.name}</td>
                                             <td className="p-3 font-mono text-amber-700">{p.longitude.toFixed(2)}°</td>
                                             <td className="p-3 text-gray-700">{Math.ceil(p.longitude / 30)} (Sign)</td>
-                                            <td className="p-3 text-gray-600">--</td>
+                                            <td className="p-3 text-gray-600">{p.nakshatra}</td>
                                             <td className="p-3">
                                                 {p.isRetro && <span className="inline-block px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full mr-1">Ret</span>}
                                                 {p.isExalted && <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Exalt</span>}
+                                                {p.isCombust && <span className="inline-block px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full">Comb</span>}
                                             </td>
                                         </tr>
                                     ))}
