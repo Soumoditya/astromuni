@@ -122,33 +122,7 @@ function checkSadeSati(moonSign, saturnSign) {
 
 
 
-function checkManglik(lagnaSign, marsSign, moonSign) {
-  // Check Mars position relative to Lagna and Moon
-  // House Indices (0-11)
-  const marsHouseL = (marsSign - lagnaSign + 12) % 12; // 0=H1, 1=H2...
-  // Manglik Houses: 1, 2, 4, 7, 8, 12. (Indices: 0, 1, 3, 6, 7, 11)
-  const badHouses = [0, 1, 3, 6, 7, 11];
 
-  let fromLagna = badHouses.includes(marsHouseL);
-
-  // From Moon
-  const marsHouseM = (marsSign - moonSign + 12) % 12;
-  let fromMoon = badHouses.includes(marsHouseM);
-
-  return { isManglik: fromLagna || fromMoon, fromLagna, fromMoon };
-}
-
-function checkSadeSati(moonSign, saturnSign) {
-  // Sade Sati: Saturn in 12th, 1st, or 2nd from Natal Moon
-  // 12th = Index 11
-  // 1st  = Index 0
-  // 2nd  = Index 1
-  const diff = (saturnSign - moonSign + 12) % 12;
-  if (diff === 11) return { status: true, phase: "Rising (1st Phase)" };
-  if (diff === 0) return { status: true, phase: "Peak (2nd Phase)" };
-  if (diff === 1) return { status: true, phase: "Setting (3rd Phase)" };
-  return { status: false, phase: "None" };
-}
 function isRetrograde(body, date, observer) {
   if (body === "Sun" || body === "Moon") return false;
   // Calculate dist now and 1 min later
