@@ -150,7 +150,7 @@ export function calculateChartData(date, location) {
   const time = Astronomy.MakeTime(date);
   const jd = time.ut;
   const ayanamsa = calculateAyanamsa(jd);
-  const obliquity = Astronomy.e_tilt(time);
+  const obliquity = Astronomy.e_tilt(time).tobl;
 
   // 1. Calculate Ascendant (Lagna)
   const mst = Astronomy.SiderealTime(time);
