@@ -252,12 +252,13 @@ function getGeoEcliptic(body, date, observer, obliquity) {
 export function calculateChartData(date, location) {
   const { lat, lon } = location;
   const observer = new Astronomy.Observer(lat, lon, 0);
-  const jd = Astronomy.DayValue(date);
+  const time = Astronomy.MakeTime(date);
+  const jd = time.ut;
   const ayanamsa = calculateAyanamsa(jd);
-  const obliquity = Astronomy.Obliquity(date);
+  const obliquity = Astronomy.e_tilt(time);
 
   // 1. Calculate Ascendant (Lagna)
-  const mst = Astronomy.SiderealTime(date);
+  const mst = Astronomy.SiderealTime(time);
   const armc = (mst * 15 + lon) % 360; // RAMC in degrees
   const eps = obliquity * Math.PI / 180;
   const theta = armc * Math.PI / 180;
@@ -297,7 +298,7 @@ export function calculateChartData(date, location) {
   const planets = [];
 
   // Sun Position for Combustion
-  const sunTrop = getGeoEcliptic("Sun", date, observer, obliquity);
+  const sunTrop = getGeoEcliptic("Sun", time, observer, obliquity);
   const sunSid = normalize(sunTrop - ayanamsa);
 
   bodies.forEach(name => {
@@ -308,13 +309,14 @@ export function calculateChartData(date, location) {
     else if (name === "Ketu") sidLon = ketuSid;
     else {
       // 1. Get Tropical Longitude
-      const t1Lon = getGeoEcliptic(name, date, observer, obliquity);
+      const t1Lon = getGeoEcliptic(name, time, observer, obliquity);
       sidLon = normalize(t1Lon - ayanamsa);
 
       // 2. Retrograde check
       if (name !== "Sun" && name !== "Moon") {
         const d2 = new Date(date.getTime() - 3600 * 1000); // 1 hour BEFORE
-        const t0Lon = getGeoEcliptic(name, d2, observer, obliquity);
+        const time2 = Astronomy.MakeTime(d2);
+        const t0Lon = getGeoEcliptic(name, time2, observer, obliquity);
         // If current is less than previous (Forward is increasing)
         // Check wrapping
         let diff = t1Lon - t0Lon;
